@@ -1,58 +1,107 @@
-import './style.css';
-import { renderLandingPage } from './src/pages/landing.js';
-import { renderDashboard } from './src/pages/dashboard.js';
+import { renderPredictionChart, renderFeatureImportance, renderROCCurve, renderLearningCurve } from '../../utils/charts.js';
 
-const app = {
-  currentPage: 'landing',
-  data: null,
-  preprocessedData: null,
-  selectedAlgorithm: null,
-  modelResults: null,
-  
-  init() {
-    this.render();
-  },
-  
-  navigateTo(page) {
-    this.currentPage = page;
-    this.render();
-  },
-  
-  render() {
-    const appContainer = document.getElementById('app');
-    
-    if (this.currentPage === 'landing') {
-      appContainer.innerHTML = renderLandingPage();
-      this.attachLandingListeners();
-    } else if (this.currentPage === 'dashboard') {
-      appContainer.innerHTML = renderDashboard();
-      this.attachDashboardListeners();
+export function renderVisualizeSection(app) {
+    if (!app.modelResults) {
+        return `<div class="text-center p-8 card"><h2 class="text-xl font-semibold">Model belum dilatih</h2><p class="text-slate-600 mt-2">Silakan latih model terlebih dahulu untuk melihat visualisasi hasil.</p></div>`;
     }
-  },
-  
-  attachLandingListeners() {
-    const startBtn = document.getElementById('start-btn');
-    if (startBtn) {
-      startBtn.addEventListener('click', () => {
-        this.navigateTo('dashboard');
-      });
-    }
-  },
-  
-  attachDashboardListeners() {
-    const backBtn = document.getElementById('back-to-home');
-    if (backBtn) {
-      backBtn.addEventListener('click', () => {
-        this.navigateTo('landing');
-      });
-    }
-    
-    import('./src/components/dashboard-handlers.js').then(module => {
-      module.initDashboardHandlers(this);
-    });
-  }
-};
 
-app.init();
+    const getChartContainers = (algoType) => {
+        let charts = `
+            <div class="chart-container">
+                <h3 class="text-lg font-bold text-slate-800 mb-4">Pentingnya Fitur (Feature Importance)</h3>
+                <canvas id="feature-importance-chart"></canvas>
+            </div>
+        `;
 
-export default app;
+        if (algoType === 'regression') {
+            charts += `
+                <div class="chart-container">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4">Prediksi vs Aktual</h3>
+                    <canvas id="prediction-chart"></canvas>
+                </div>
+            `;
+        }
+
+        if (algoType === 'classification') {
+             charts += `
+                <div class="chart-container">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4">Kurva ROC (ROC Curve)</h3>
+                    <canvas id="roc-chart"></canvas>
+                </div>
+            `;
+        }
+        
+        charts += `
+            <div class="chart-container">
+                <h3 class="text-lg font-bold text-slate-800 mb-4">Kurva Pembelajaran (Learning Curve)</h3>
+                <canvas id="learning-curve-chart"></canvas>
+            </div>
+        `;
+
+        return charts;
+    }
+
+  return `
+    <div class="space-y-8 fade-in opacity-0 translate-y-4 transition-all duration-500">
+      <div>
+        <h1 class="text-3xl font-bold text-slate-800 mb-2">Visualisasi Hasil</h1>
+        <p class="text-slate-600">Jelajahi hasil model Anda melalui visualisasi interaktif.</p>
+      </div>
+
+      <!-- Grid Visualisasi -->
+      <div class="grid lg:grid-cols-2 gap-6">
+        ${getChartContainers(app.selectedAlgorithm.type)}
+      </div>
+
+      <!-- Opsi Ekspor -->
+      <div class="card">
+        <h3 class="text-xl font-bold text-slate-800 mb-4">Ekspor Hasil</h3>
+        <div class="grid md:grid-cols-3 gap-4">
+          <button class="btn-secondary flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            Unduh Laporan
+          </button>
+          <button class="btn-secondary flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+            </svg>
+            Ekspor Model
+          </button>
+          <button class="btn-secondary flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+            </svg>
+            Bagikan Hasil
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+export function initVisualizeHandlers(app) {
+    if (!app.modelResults) return;
+
+    const { type } = app.selectedAlgorithm;
+    const { modelResults } = app;
+
+    // Common charts
+    const featureChartCanvas = document.getElementById('feature-importance-chart');
+    if (featureChartCanvas) renderFeatureImportance(modelResults, featureChartCanvas);
+
+    const learningCurveCanvas = document.getElementById('learning-curve-chart');
+    if(learningCurveCanvas) renderLearningCurve(learningCurveCanvas);
+
+    // Algorithm-specific charts
+    if (type === 'regression') {
+        const predictionChartCanvas = document.getElementById('prediction-chart');
+        if (predictionChartCanvas) renderPredictionChart(modelResults, predictionChartCanvas);
+    }
+
+    if (type === 'classification') {
+        const rocChartCanvas = document.getElementById('roc-chart');
+        if (rocChartCanvas) renderROCCurve(modelResults, rocChartCanvas);
+    }
+}

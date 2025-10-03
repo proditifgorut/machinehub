@@ -1,159 +1,22 @@
-import { enableNextSidebar } from '../dashboard-handlers.js';
-import { dropMissingValues, normalizeData, encodeCategoricalData } from '../../utils/data-processing.js';
-import { renderHistogram, renderScatterPlot, renderCorrelationHeatmap } from '../../utils/charts.js';
-
-export function renderPreprocessSection(app) {
-  if (!app.data) {
-    return `<div class="text-center p-8 card"><h2 class="text-xl font-semibold">Data tidak ditemukan</h2><p class="text-slate-600 mt-2">Silakan unggah dataset terlebih dahulu untuk memulai preprocessing.</p></div>`;
+{
+  "name": "website",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5",
+    "tailwindcss": "^3.4.1",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^8.4.1",
+    "chart.js": "^4.4.3",
+    "xlsx": "^0.18.5"
   }
-  
-  const numericCols = app.data.headers.filter(h => app.data.rows.every(r => !isNaN(parseFloat(r[h]))));
-  const categoricalCols = app.data.headers.filter(h => !numericCols.includes(h));
-
-  return `
-    <div class="space-y-8 fade-in opacity-0 translate-y-4 transition-all duration-500">
-      <div>
-        <h1 class="text-3xl font-bold text-slate-800 mb-2">Preprocessing & Visualisasi</h1>
-        <p class="text-slate-600">Bersihkan, siapkan, dan visualisasikan data Anda sebelum training.</p>
-      </div>
-
-      <div class="grid lg:grid-cols-2 gap-6">
-        <!-- Opsi Preprocessing -->
-        <div class="card">
-          <h2 class="text-xl font-bold text-slate-800 mb-4">Opsi Preprocessing</h2>
-          
-          <div class="space-y-4">
-            <label class="flex items-center gap-3 p-4 border-2 border-slate-200 rounded-lg cursor-pointer hover:border-primary-400 transition-all">
-              <input type="checkbox" id="drop-missing" class="w-5 h-5 text-primary-600 rounded focus:ring-primary-500">
-              <div>
-                <div class="font-semibold text-slate-700">Hapus Nilai Kosong</div>
-                <div class="text-sm text-slate-500">Hapus semua baris yang mengandung data kosong.</div>
-              </div>
-            </label>
-
-            <label class="flex items-center gap-3 p-4 border-2 border-slate-200 rounded-lg cursor-pointer hover:border-primary-400 transition-all">
-              <input type="checkbox" id="normalize" class="w-5 h-5 text-primary-600 rounded focus:ring-primary-500">
-              <div>
-                <div class="font-semibold text-slate-700">Normalisasi Data</div>
-                <div class="text-sm text-slate-500">Skalakan fitur numerik ke rentang 0-1.</div>
-              </div>
-            </label>
-
-            <label class="flex items-center gap-3 p-4 border-2 border-slate-200 rounded-lg cursor-pointer hover:border-primary-400 transition-all">
-              <input type="checkbox" id="encode-categorical" class="w-5 h-5 text-primary-600 rounded focus:ring-primary-500">
-              <div>
-                <div class="font-semibold text-slate-700">Encode Data Kategorikal</div>
-                <div class="text-sm text-slate-500">Ubah kategori teks menjadi angka (One-Hot Encoding).</div>
-              </div>
-            </label>
-          </div>
-
-          <button id="apply-preprocessing" class="btn-primary w-full mt-6">
-            Terapkan Preprocessing
-          </button>
-          <div id="preprocess-feedback" class="text-sm text-green-600 mt-3 text-center font-medium"></div>
-        </div>
-
-        <!-- Opsi Visualisasi -->
-        <div class="card">
-          <h2 class="text-xl font-bold text-slate-800 mb-4">Visualisasi Data</h2>
-          <div id="visualize-options" class="space-y-4">
-            <div>
-              <label for="hist-column" class="block text-sm font-medium text-slate-700 mb-2">Histogram</label>
-              <select id="hist-column" class="input-field">
-                <option value="">Pilih kolom numerik</option>
-                ${numericCols.map(c => `<option value="${c}">${c}</option>`).join('')}
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">Scatter Plot</label>
-              <div class="flex gap-2">
-                <select id="scatter-x" class="input-field"><option value="">Pilih X</option>${numericCols.map(c => `<option value="${c}">${c}</option>`).join('')}</select>
-                <select id="scatter-y" class="input-field"><option value="">Pilih Y</option>${numericCols.map(c => `<option value="${c}">${c}</option>`).join('')}</select>
-              </div>
-            </div>
-             <div>
-              <button id="show-heatmap" class="w-full btn-secondary mt-2">Tampilkan Heatmap Korelasi</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Area Chart -->
-      <div id="chart-display-area" class="card hidden">
-        <h3 id="chart-title" class="text-xl font-bold text-slate-800 mb-4"></h3>
-        <canvas id="chart-canvas"></canvas>
-      </div>
-
-      <div class="flex justify-end">
-        <button id="proceed-algorithm" class="btn-primary">
-          Pilih Algoritma
-          <svg class="w-5 h-5 inline ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-          </svg>
-        </button>
-      </div>
-    </div>
-  `;
-}
-
-export function initPreprocessHandlers(app) {
-  document.getElementById('apply-preprocessing')?.addEventListener('click', () => {
-    const dropMissing = document.getElementById('drop-missing').checked;
-    const normalize = document.getElementById('normalize').checked;
-    const encodeCategorical = document.getElementById('encode-categorical').checked;
-    
-    let processedData = JSON.parse(JSON.stringify(app.data)); // Start with original data
-    
-    if (dropMissing) processedData = dropMissingValues(processedData);
-    if (normalize) processedData = normalizeData(processedData);
-    if (encodeCategorical) processedData = encodeCategoricalData(processedData);
-    
-    app.preprocessedData = processedData;
-    
-    const feedback = document.getElementById('preprocess-feedback');
-    feedback.textContent = 'Preprocessing berhasil diterapkan!';
-    setTimeout(() => feedback.textContent = '', 3000);
-
-    enableNextSidebar('algorithm');
-  });
-  
-  document.getElementById('proceed-algorithm')?.addEventListener('click', () => {
-    document.querySelector('[data-section="algorithm"]').click();
-  });
-
-  const chartArea = document.getElementById('chart-display-area');
-  const chartTitle = document.getElementById('chart-title');
-  const chartCanvas = document.getElementById('chart-canvas');
-
-  document.getElementById('hist-column')?.addEventListener('change', (e) => {
-    const column = e.target.value;
-    if(column) {
-      chartArea.classList.remove('hidden');
-      chartTitle.textContent = `Histogram untuk ${column}`;
-      renderHistogram(app.preprocessedData, column, chartCanvas);
-    }
-  });
-
-  const scatterX = document.getElementById('scatter-x');
-  const scatterY = document.getElementById('scatter-y');
-
-  const renderScatter = () => {
-    const xCol = scatterX.value;
-    const yCol = scatterY.value;
-    if (xCol && yCol) {
-      chartArea.classList.remove('hidden');
-      chartTitle.textContent = `Scatter Plot: ${xCol} vs ${yCol}`;
-      renderScatterPlot(app.preprocessedData, xCol, yCol, chartCanvas);
-    }
-  };
-
-  scatterX?.addEventListener('change', renderScatter);
-  scatterY?.addEventListener('change', renderScatter);
-
-  document.getElementById('show-heatmap')?.addEventListener('click', () => {
-    chartArea.classList.remove('hidden');
-    chartTitle.textContent = 'Heatmap Korelasi Antar Fitur Numerik';
-    renderCorrelationHeatmap(app.preprocessedData, chartCanvas);
-  });
 }

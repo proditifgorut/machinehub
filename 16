@@ -1,161 +1,42 @@
-import { displayDataPreview } from './upload.js';
-import { loadSection, enableNextSidebar } from '../dashboard-handlers.js';
-
-export function renderDatasetsSection() {
-  return `
-    <div class="space-y-8 fade-in opacity-0 translate-y-4 transition-all duration-500">
-      <div>
-        <h1 class="text-3xl font-bold text-slate-800 mb-2">Dataset Sampel</h1>
-        <p class="text-slate-600">Coba algoritma ML dengan dataset bawaan tanpa perlu mengunggah.</p>
-      </div>
-
-      <div class="grid md:grid-cols-3 gap-6">
-        <!-- Dataset Iris -->
-        <div class="card hover:shadow-xl transition-all cursor-pointer group" data-dataset="iris">
-          <div class="flex items-start justify-between mb-4">
-            <div class="w-14 h-14 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
-              </svg>
-            </div>
-            <span class="metric-badge bg-purple-100 text-purple-700">Klasifikasi</span>
-          </div>
-          
-          <h3 class="text-xl font-bold text-slate-800 mb-2">Dataset Iris</h3>
-          <p class="text-sm text-slate-600 mb-4">Dataset klasik untuk klasifikasi bunga dengan 3 spesies berdasarkan ukuran kelopak dan mahkota.</p>
-          
-          <div class="grid grid-cols-2 gap-3 text-center pt-4 border-t border-slate-200">
-            <div>
-              <div class="text-2xl font-bold text-slate-800">150</div>
-              <div class="text-xs text-slate-500">Sampel</div>
-            </div>
-            <div>
-              <div class="text-2xl font-bold text-slate-800">4</div>
-              <div class="text-xs text-slate-500">Fitur</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Dataset Titanic -->
-        <div class="card hover:shadow-xl transition-all cursor-pointer group" data-dataset="titanic">
-          <div class="flex items-start justify-between mb-4">
-            <div class="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-              </svg>
-            </div>
-            <span class="metric-badge bg-blue-100 text-blue-700">Klasifikasi</span>
-          </div>
-          
-          <h3 class="text-xl font-bold text-slate-800 mb-2">Dataset Titanic</h3>
-          <p class="text-sm text-slate-600 mb-4">Memprediksi kelangsungan hidup penumpang berdasarkan demografi dan informasi tiket.</p>
-          
-          <div class="grid grid-cols-2 gap-3 text-center pt-4 border-t border-slate-200">
-            <div>
-              <div class="text-2xl font-bold text-slate-800">891</div>
-              <div class="text-xs text-slate-500">Sampel</div>
-            </div>
-            <div>
-              <div class="text-2xl font-bold text-slate-800">12</div>
-              <div class="text-xs text-slate-500">Fitur</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Dataset Harga Rumah -->
-        <div class="card hover:shadow-xl transition-all cursor-pointer group" data-dataset="housing">
-          <div class="flex items-start justify-between mb-4">
-            <div class="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-              </svg>
-            </div>
-            <span class="metric-badge bg-orange-100 text-orange-700">Regresi</span>
-          </div>
-          
-          <h3 class="text-xl font-bold text-slate-800 mb-2">Harga Rumah</h3>
-          <p class="text-sm text-slate-600 mb-4">Memprediksi harga rumah berdasarkan lokasi, ukuran, dan fitur properti.</p>
-          
-          <div class="grid grid-cols-2 gap-3 text-center pt-4 border-t border-slate-200">
-            <div>
-              <div class="text-2xl font-bold text-slate-800">506</div>
-              <div class="text-xs text-slate-500">Sampel</div>
-            </div>
-            <div>
-              <div class="text-2xl font-bold text-slate-800">13</div>
-              <div class="text-xs text-slate-500">Fitur</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-export function initDatasetsHandlers(app) {
-  const datasetCards = document.querySelectorAll('[data-dataset]');
-  
-  const datasets = {
-    iris: {
-      name: 'Iris',
-      headers: ['sepal_length', 'sepal_width', 'petal_length', 'petal_width', 'species'],
-      rows: [
-        { sepal_length: 5.1, sepal_width: 3.5, petal_length: 1.4, petal_width: 0.2, species: 'setosa' },
-        { sepal_length: 4.9, sepal_width: 3.0, petal_length: 1.4, petal_width: 0.2, species: 'setosa' },
-        { sepal_length: 7.0, sepal_width: 3.2, petal_length: 4.7, petal_width: 1.4, species: 'versicolor' },
-        { sepal_length: 6.4, sepal_width: 3.2, petal_length: 4.5, petal_width: 1.5, species: 'versicolor' },
-        { sepal_length: 6.3, sepal_width: 3.3, petal_length: 6.0, petal_width: 2.5, species: 'virginica' },
-        { sepal_length: 5.8, sepal_width: 2.7, petal_length: 5.1, petal_width: 1.9, species: 'virginica' },
-        { sepal_length: 5.0, sepal_width: 3.4, petal_length: 1.5, petal_width: 0.2, species: 'setosa' },
-        { sepal_length: 6.0, sepal_width: 2.2, petal_length: 4.0, petal_width: 1.0, species: 'versicolor' },
-      ]
+export default {
+  content: [
+    "./index.html",
+    "./main.js",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          200: '#bae6fd',
+          300: '#7dd3fc',
+          400: '#38bdf8',
+          500: '#0ea5e9',
+          600: '#0284c7',
+          700: '#0369a1',
+          800: '#075985',
+          900: '#0c4a6e',
+        },
+        accent: {
+          50: '#fdf4ff',
+          100: '#fae8ff',
+          200: '#f5d0fe',
+          300: '#f0abfc',
+          400: '#e879f9',
+          500: '#d946ef',
+          600: '#c026d3',
+          700: '#a21caf',
+          800: '#86198f',
+          900: '#701a75',
+        }
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['Fira Code', 'monospace'],
+      },
     },
-    titanic: {
-      name: 'Titanic',
-      headers: ['passenger_id', 'survived', 'pclass', 'name', 'sex', 'age', 'fare'],
-      rows: [
-        { passenger_id: 1, survived: 0, pclass: 3, name: 'Braund, Mr. Owen', sex: 'male', age: 22, fare: 7.25 },
-        { passenger_id: 2, survived: 1, pclass: 1, name: 'Cumings, Mrs. John', sex: 'female', age: 38, fare: 71.28 },
-        { passenger_id: 3, survived: 1, pclass: 3, name: 'Heikkinen, Miss. Laina', sex: 'female', age: 26, fare: 7.92 },
-        { passenger_id: 4, survived: 1, pclass: 1, name: 'Futrelle, Mrs. Jacques', sex: 'female', age: 35, fare: 53.10 },
-        { passenger_id: 5, survived: 0, pclass: 3, name: 'Allen, Mr. William', sex: 'male', age: 35, fare: 8.05 },
-        { passenger_id: 6, survived: 0, pclass: 3, name: 'Moran, Mr. James', sex: 'male', age: null, fare: 8.45 },
-        { passenger_id: 7, survived: 0, pclass: 1, name: 'McCarthy, Mr. Timothy', sex: 'male', age: 54, fare: 51.86 },
-      ]
-    },
-    housing: {
-      name: 'Housing',
-      headers: ['CRIM', 'ZN', 'INDUS', 'RM', 'AGE', 'DIS', 'TAX', 'PRICE'],
-      rows: [
-        { CRIM: 0.006, ZN: 18.0, INDUS: 2.31, RM: 6.58, AGE: 65.2, DIS: 4.09, TAX: 296, PRICE: 24.0 },
-        { CRIM: 0.027, ZN: 0.0, INDUS: 7.07, RM: 6.42, AGE: 78.9, DIS: 4.97, TAX: 242, PRICE: 21.6 },
-        { CRIM: 0.027, ZN: 0.0, INDUS: 7.07, RM: 7.18, AGE: 61.1, DIS: 4.97, TAX: 242, PRICE: 34.7 },
-        { CRIM: 0.032, ZN: 0.0, INDUS: 2.18, RM: 6.99, AGE: 45.8, DIS: 6.06, TAX: 222, PRICE: 33.4 },
-        { CRIM: 0.069, ZN: 0.0, INDUS: 2.18, RM: 7.15, AGE: 54.2, DIS: 6.06, TAX: 222, PRICE: 36.2 },
-        { CRIM: 0.029, ZN: 0.0, INDUS: 2.18, RM: 6.43, AGE: 58.7, DIS: 6.06, TAX: 222, PRICE: 28.7 },
-        { CRIM: 0.088, ZN: 12.5, INDUS: 7.87, RM: 6.01, AGE: 66.6, DIS: 5.56, TAX: 311, PRICE: 22.9 },
-      ]
-    }
-  };
-  
-  datasetCards.forEach(card => {
-    card.addEventListener('click', () => {
-      const datasetName = card.dataset.dataset;
-      const dataset = datasets[datasetName];
-      
-      app.data = dataset;
-      app.preprocessedData = JSON.parse(JSON.stringify(dataset)); // Deep copy
-
-      const dashboardContent = document.getElementById('dashboard-content');
-      loadSection('upload', dashboardContent, app);
-      
-      // Since we are loading a section, the DOM is recreated. We need a small delay.
-      setTimeout(() => {
-        displayDataPreview(dataset, `${dataset.name} (Sampel)`);
-        document.querySelector('.sidebar-link[data-section="upload"]').classList.add('active');
-        document.querySelector('.sidebar-link[data-section="datasets"]').classList.remove('active');
-        enableNextSidebar('preprocess');
-      }, 50);
-    });
-  });
+  },
+  plugins: [],
 }

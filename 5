@@ -1,42 +1,198 @@
-export default {
-  content: [
-    "./index.html",
-    "./main.js",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
-  theme: {
-    extend: {
-      colors: {
-        primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
-        },
-        accent: {
-          50: '#fdf4ff',
-          100: '#fae8ff',
-          200: '#f5d0fe',
-          300: '#f0abfc',
-          400: '#e879f9',
-          500: '#d946ef',
-          600: '#c026d3',
-          700: '#a21caf',
-          800: '#86198f',
-          900: '#701a75',
-        }
-      },
-      fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['Fira Code', 'monospace'],
-      },
-    },
-  },
-  plugins: [],
+import { enableNextSidebar } from '../dashboard-handlers.js';
+
+export function renderAlgorithmSection(app) {
+    if (!app.preprocessedData) {
+        return `<div class="text-center p-8 card"><h2 class="text-xl font-semibold">Data belum diproses</h2><p class="text-slate-600 mt-2">Silakan unggah dan proses data Anda terlebih dahulu.</p></div>`;
+    }
+  return `
+    <div class="space-y-8 fade-in opacity-0 translate-y-4 transition-all duration-500">
+      <div>
+        <h1 class="text-3xl font-bold text-slate-800 mb-2">Pilih Algoritma</h1>
+        <p class="text-slate-600">Pilih algoritma machine learning yang sesuai untuk tugas Anda.</p>
+      </div>
+
+      <!-- Supervised Learning -->
+      <div>
+        <h2 class="text-2xl font-bold text-slate-800 mb-4">Supervised Learning</h2>
+        
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-slate-700 mb-3">Regresi</h3>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="algorithm-card" data-algorithm="linear-regression" data-type="regression">
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center">
+                  <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded">REGRESI</span>
+              </div>
+              <h4 class="font-bold text-slate-800 mb-2">Regresi Linier</h4>
+              <p class="text-sm text-slate-600">Hubungan linier sederhana antara variabel.</p>
+            </div>
+
+            <div class="algorithm-card" data-algorithm="polynomial-regression" data-type="regression">
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg flex items-center justify-center">
+                  <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded">REGRESI</span>
+              </div>
+              <h4 class="font-bold text-slate-800 mb-2">Regresi Polinomial</h4>
+              <p class="text-sm text-slate-600">Hubungan non-linier dengan fitur polinomial.</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold text-slate-700 mb-3">Klasifikasi</h3>
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="algorithm-card" data-algorithm="logistic-regression" data-type="classification">
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center">
+                  <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded">KLASIFIKASI</span>
+              </div>
+              <h4 class="font-bold text-slate-800 mb-2">Regresi Logistik</h4>
+              <p class="text-sm text-slate-600">Masalah klasifikasi biner.</p>
+            </div>
+
+            <div class="algorithm-card" data-algorithm="knn" data-type="classification">
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-lg flex items-center justify-center">
+                  <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded">KLASIFIKASI</span>
+              </div>
+              <h4 class="font-bold text-slate-800 mb-2">K-Nearest Neighbors</h4>
+              <p class="text-sm text-slate-600">Algoritma pembelajaran berbasis instans.</p>
+            </div>
+
+            <div class="algorithm-card" data-algorithm="decision-tree" data-type="classification">
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-teal-400 to-teal-600 rounded-lg flex items-center justify-center">
+                  <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded">KLASIFIKASI</span>
+              </div>
+              <h4 class="font-bold text-slate-800 mb-2">Decision Tree</h4>
+              <p class="text-sm text-slate-600">Model klasifikasi berbasis pohon.</p>
+            </div>
+
+            <div class="algorithm-card" data-algorithm="random-forest" data-type="classification">
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-lg flex items-center justify-center">
+                  <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded">KLASIFIKASI</span>
+              </div>
+              <h4 class="font-bold text-slate-800 mb-2">Random Forest</h4>
+              <p class="text-sm text-slate-600">Kumpulan dari beberapa decision tree.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unsupervised Learning -->
+      <div>
+        <h2 class="text-2xl font-bold text-slate-800 mb-4">Unsupervised Learning</h2>
+        
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-slate-700 mb-3">Clustering</h3>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="algorithm-card" data-algorithm="kmeans" data-type="clustering">
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-pink-400 to-pink-600 rounded-lg flex items-center justify-center">
+                  <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded">CLUSTER</span>
+              </div>
+              <h4 class="font-bold text-slate-800 mb-2">K-Means Clustering</h4>
+              <p class="text-sm text-slate-600">Membagi data menjadi K cluster.</p>
+            </div>
+
+            <div class="algorithm-card" data-algorithm="hierarchical" data-type="clustering">
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-lg flex items-center justify-center">
+                  <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded">CLUSTER</span>
+              </div>
+              <h4 class="font-bold text-slate-800 mb-2">Hierarchical Clustering</h4>
+              <p class="text-sm text-slate-600">Membangun hierarki cluster.</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold text-slate-700 mb-3">Aturan Asosiasi</h3>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="algorithm-card" data-algorithm="apriori" data-type="association">
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg flex items-center justify-center">
+                  <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded">ATURAN</span>
+              </div>
+              <h4 class="font-bold text-slate-800 mb-2">Algoritma Apriori</h4>
+              <p class="text-sm text-slate-600">Menemukan itemset dan aturan yang sering muncul.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end">
+        <button id="proceed-train" class="btn-primary" disabled>
+          Konfigurasi & Latih
+          <svg class="w-5 h-5 inline ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+export function initAlgorithmHandlers(app) {
+  const algorithmCards = document.querySelectorAll('.algorithm-card');
+  const proceedBtn = document.getElementById('proceed-train');
+  
+  algorithmCards.forEach(card => {
+    card.addEventListener('click', () => {
+      algorithmCards.forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      app.selectedAlgorithm = {
+        id: card.dataset.algorithm,
+        type: card.dataset.type,
+        name: card.querySelector('h4').textContent
+      };
+      proceedBtn.removeAttribute('disabled');
+      enableNextSidebar('train');
+    });
+  });
+  
+  proceedBtn?.addEventListener('click', () => {
+    if (!app.selectedAlgorithm) {
+      alert('Silakan pilih algoritma terlebih dahulu!');
+      return;
+    }
+    document.querySelector('[data-section="train"]').click();
+  });
 }

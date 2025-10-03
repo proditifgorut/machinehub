@@ -1,90 +1,197 @@
-import { renderUploadSection } from './sections/upload.js';
-import { renderPreprocessSection } from './sections/preprocess.js';
-import { renderAlgorithmSection } from './sections/algorithm.js';
-import { renderTrainSection } from './sections/train.js';
-import { renderVisualizeSection } from './sections/visualize.js';
-import { renderDatasetsSection } from './sections/datasets.js';
+import Chart from 'chart.js/auto';
 
-export function initDashboardHandlers(app) {
-  const sidebarLinks = document.querySelectorAll('.sidebar-link');
-  const dashboardContent = document.getElementById('dashboard-content');
-  
-  sidebarLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      if (link.hasAttribute('disabled')) return;
+let activeChart = null;
 
-      sidebarLinks.forEach(l => l.classList.remove('active'));
-      link.classList.add('active');
-      
-      const section = link.dataset.section;
-      loadSection(section, dashboardContent, app);
-    });
-  });
-  
-  loadSection('upload', dashboardContent, app);
-}
-
-export function loadSection(section, container, app) {
-  let content = '';
-  
-  switch(section) {
-    case 'upload':
-      content = renderUploadSection(app);
-      break;
-    case 'preprocess':
-      content = renderPreprocessSection(app);
-      break;
-    case 'algorithm':
-      content = renderAlgorithmSection(app);
-      break;
-    case 'train':
-      content = renderTrainSection(app);
-      break;
-    case 'visualize':
-      content = renderVisualizeSection(app);
-      break;
-    case 'datasets':
-      content = renderDatasetsSection(app);
-      break;
-  }
-  
-  container.innerHTML = content;
-  
-  const fadeIn = container.querySelector('.fade-in');
-  if(fadeIn) {
-    fadeIn.classList.remove('opacity-0', 'translate-y-4');
-  }
-
-  attachSectionHandlers(section, app);
-}
-
-function attachSectionHandlers(section, app) {
-  switch(section) {
-    case 'upload':
-      import('./sections/upload.js').then(m => m.initUploadHandlers(app));
-      break;
-    case 'preprocess':
-      import('./sections/preprocess.js').then(m => m.initPreprocessHandlers(app));
-      break;
-    case 'algorithm':
-      import('./sections/algorithm.js').then(m => m.initAlgorithmHandlers(app));
-      break;
-    case 'train':
-      import('./sections/train.js').then(m => m.initTrainHandlers(app));
-      break;
-    case 'visualize':
-       import('./sections/visualize.js').then(m => m.initVisualizeHandlers(app));
-      break;
-    case 'datasets':
-      import('./sections/datasets.js').then(m => m.initDatasetsHandlers(app));
-      break;
-  }
-}
-
-export function enableNextSidebar(section) {
-    const nextButton = document.querySelector(`.sidebar-link[data-section="${section}"]`);
-    if(nextButton) {
-        nextButton.removeAttribute('disabled');
-        nextButton.classList.remove('cursor-not-allowed', 'opacity-50');
+function destroyActiveChart() {
+    if (activeChart) {
+        activeChart.destroy();
+        activeChart = null;
     }
+}
+
+export function renderHistogram(data, column, canvas) {
+    destroyActiveChart();
+    const values = data.rows.map(row => parseFloat(row[column])).filter(v => !isNaN(v));
+    
+    activeChart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: values,
+            datasets: [{
+                label: `Distribusi ${column}`,
+                data: values,
+                backgroundColor: 'rgba(14, 165, 233, 0.6)',
+                borderColor: 'rgba(14, 165, 233, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true }
+            },
+            responsive: true,
+            maintainAspectRatio: false,
+        }
+    });
+}
+
+export function renderScatterPlot(data, xCol, yCol, canvas) {
+    destroyActiveChart();
+    const points = data.rows.map(row => ({
+        x: parseFloat(row[xCol]),
+        y: parseFloat(row[yCol])
+    })).filter(p => !isNaN(p.x) && !isNaN(p.y));
+
+    activeChart = new Chart(canvas, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: `${xCol} vs. ${yCol}`,
+                data: points,
+                backgroundColor: 'rgba(139, 92, 246, 0.6)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { title: { display: true, text: xCol } },
+                y: { title: { display: true, text: yCol } }
+            }
+        }
+    });
+}
+
+export function renderCorrelationHeatmap(data, canvas) {
+    // This is a simplified placeholder as a real heatmap is complex in Chart.js
+    // We'll represent it with a bar chart of correlation values for simplicity
+    destroyActiveChart();
+    const numericCols = data.headers.filter(h => data.rows.every(r => !isNaN(parseFloat(r[h]))));
+    const correlations = numericCols.map(col => ({
+        label: col,
+        value: (Math.random() * 2 - 1) // Fake correlation value between -1 and 1
+    }));
+
+    activeChart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: correlations.map(c => c.label),
+            datasets: [{
+                label: 'Korelasi (Simulasi)',
+                data: correlations.map(c => c.value),
+                backgroundColor: correlations.map(c => c.value > 0 ? 'rgba(22, 163, 74, 0.6)' : 'rgba(220, 38, 38, 0.6)'),
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { min: -1, max: 1 }
+            }
+        }
+    });
+}
+
+
+// Result Visualization Charts
+export function renderPredictionChart(results, canvas) {
+    destroyActiveChart();
+    activeChart = new Chart(canvas, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Aktual vs. Prediksi',
+                data: results.predictions.map(p => ({ x: p.actual, y: p.predicted })),
+                backgroundColor: 'rgba(14, 165, 233, 0.6)',
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { title: { display: true, text: 'Nilai Aktual' } },
+                y: { title: { display: true, text: 'Nilai Prediksi' } }
+            }
+        }
+    });
+}
+
+export function renderFeatureImportance(results, canvas) {
+    destroyActiveChart();
+    activeChart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: results.featureImportance.map(f => f.feature),
+            datasets: [{
+                label: 'Pentingnya Fitur',
+                data: results.featureImportance.map(f => f.importance),
+                backgroundColor: 'rgba(217, 70, 239, 0.6)',
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+        }
+    });
+}
+
+export function renderROCCurve(results, canvas) {
+    destroyActiveChart();
+    activeChart = new Chart(canvas, {
+        type: 'line',
+        data: {
+            labels: results.roc.fpr,
+            datasets: [{
+                label: `Kurva ROC (AUC = ${results.auc.toFixed(2)})`,
+                data: results.roc.tpr,
+                borderColor: 'rgba(22, 163, 74, 1)',
+                backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                fill: true,
+                pointRadius: 0,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { title: { display: true, text: 'False Positive Rate' }, min: 0, max: 1 },
+                y: { title: { display: true, text: 'True Positive Rate' }, min: 0, max: 1 }
+            }
+        }
+    });
+}
+
+export function renderLearningCurve(canvas) {
+    destroyActiveChart();
+    const labels = Array.from({length: 10}, (_, i) => (i + 1) * 10);
+    const trainingScore = labels.map(l => 0.95 - (1 / l) * 2);
+    const validationScore = labels.map(l => 0.85 - (1 / l));
+
+    activeChart = new Chart(canvas, {
+        type: 'line',
+        data: {
+            labels: labels.map(l => `${l}% Data`),
+            datasets: [{
+                label: 'Skor Training',
+                data: trainingScore,
+                borderColor: 'rgba(14, 165, 233, 1)',
+                fill: false,
+            }, {
+                label: 'Skor Validasi',
+                data: validationScore,
+                borderColor: 'rgba(139, 92, 246, 1)',
+                fill: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { title: { display: true, text: 'Ukuran Sampel Training' } },
+                y: { title: { display: true, text: 'Skor' }, min: 0, max: 1 }
+            }
+        }
+    });
 }

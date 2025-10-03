@@ -1,22 +1,90 @@
-{
-  "name": "website",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "devDependencies": {
-    "vite": "^6.3.5",
-    "tailwindcss": "^3.4.1",
-    "autoprefixer": "^10.4.17",
-    "postcss": "^8.4.35"
-  },
-  "dependencies": {
-    "@faker-js/faker": "^8.4.1",
-    "chart.js": "^4.4.3",
-    "xlsx": "^0.18.5"
+import { renderUploadSection } from './sections/upload.js';
+import { renderPreprocessSection } from './sections/preprocess.js';
+import { renderAlgorithmSection } from './sections/algorithm.js';
+import { renderTrainSection } from './sections/train.js';
+import { renderVisualizeSection } from './sections/visualize.js';
+import { renderDatasetsSection } from './sections/datasets.js';
+
+export function initDashboardHandlers(app) {
+  const sidebarLinks = document.querySelectorAll('.sidebar-link');
+  const dashboardContent = document.getElementById('dashboard-content');
+  
+  sidebarLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      if (link.hasAttribute('disabled')) return;
+
+      sidebarLinks.forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+      
+      const section = link.dataset.section;
+      loadSection(section, dashboardContent, app);
+    });
+  });
+  
+  loadSection('upload', dashboardContent, app);
+}
+
+export function loadSection(section, container, app) {
+  let content = '';
+  
+  switch(section) {
+    case 'upload':
+      content = renderUploadSection(app);
+      break;
+    case 'preprocess':
+      content = renderPreprocessSection(app);
+      break;
+    case 'algorithm':
+      content = renderAlgorithmSection(app);
+      break;
+    case 'train':
+      content = renderTrainSection(app);
+      break;
+    case 'visualize':
+      content = renderVisualizeSection(app);
+      break;
+    case 'datasets':
+      content = renderDatasetsSection(app);
+      break;
   }
+  
+  container.innerHTML = content;
+  
+  const fadeIn = container.querySelector('.fade-in');
+  if(fadeIn) {
+    fadeIn.classList.remove('opacity-0', 'translate-y-4');
+  }
+
+  attachSectionHandlers(section, app);
+}
+
+function attachSectionHandlers(section, app) {
+  switch(section) {
+    case 'upload':
+      import('./sections/upload.js').then(m => m.initUploadHandlers(app));
+      break;
+    case 'preprocess':
+      import('./sections/preprocess.js').then(m => m.initPreprocessHandlers(app));
+      break;
+    case 'algorithm':
+      import('./sections/algorithm.js').then(m => m.initAlgorithmHandlers(app));
+      break;
+    case 'train':
+      import('./sections/train.js').then(m => m.initTrainHandlers(app));
+      break;
+    case 'visualize':
+       import('./sections/visualize.js').then(m => m.initVisualizeHandlers(app));
+      break;
+    case 'datasets':
+      import('./sections/datasets.js').then(m => m.initDatasetsHandlers(app));
+      break;
+  }
+}
+
+export function enableNextSidebar(section) {
+    const nextButton = document.querySelector(`.sidebar-link[data-section="${section}"]`);
+    if(nextButton) {
+        nextButton.removeAttribute('disabled');
+        nextButton.classList.remove('cursor-not-allowed', 'opacity-50');
+    }
 }
