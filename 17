@@ -1,0 +1,75 @@
+export function dropMissingValues(data) {
+    const newData = { ...data };
+    newData.rows = data.rows.filter(row => 
+        Object.values(row).every(val => val !== null && val !== undefined && val !== '')
+    );
+    return newData;
+}
+
+export function normalizeData(data) {
+    const newData = JSON.parse(JSON.stringify(data));
+    const numericColumns = data.headers.filter(header => 
+        data.rows.every(row => !isNaN(parseFloat(row[header])))
+    );
+
+    numericColumns.forEach(col => {
+        const values = newData.rows.map(row => parseFloat(row[col])).filter(v => !isNaN(v));
+        if (values.length === 0) return;
+
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const range = max - min;
+
+        if (range === 0) { // All values are the same
+            newData.rows.forEach(row => {
+                if (!isNaN(parseFloat(row[col]))) {
+                    row[col] = 0.5; // or 0, or 1, depending on preference
+                }
+            });
+        } else {
+            newData.rows.forEach(row => {
+                const val = parseFloat(row[col]);
+                if (!isNaN(val)) {
+                    row[col] = (val - min) / range;
+                }
+            });
+        }
+    });
+
+    return newData;
+}
+
+export function encodeCategoricalData(data) {
+    const newData = JSON.parse(JSON.stringify(data));
+    const categoricalColumns = data.headers.filter(header => 
+        !data.rows.every(row => !isNaN(parseFloat(row[header])))
+    );
+
+    categoricalColumns.forEach(col => {
+        const uniqueValues = [...new Set(newData.rows.map(row => row[col]))];
+        
+        // Don't encode if there are too many unique values (likely an ID or text column)
+        if (uniqueValues.length > 50 || uniqueValues.length < 2) return;
+
+        uniqueValues.forEach(uniqueVal => {
+            const newColName = `${col}_${uniqueVal}`;
+            if (!newData.headers.includes(newColName)) {
+                newData.headers.push(newColName);
+            }
+            newData.rows.forEach(row => {
+                row[newColName] = (row[col] === uniqueVal) ? 1 : 0;
+            });
+        });
+
+        // Remove original categorical column
+        const colIndex = newData.headers.indexOf(col);
+        if (colIndex > -1) {
+            newData.headers.splice(colIndex, 1);
+            newData.rows.forEach(row => {
+                delete row[col];
+            });
+        }
+    });
+
+    return newData;
+}

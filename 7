@@ -1,0 +1,58 @@
+import './style.css';
+import { renderLandingPage } from './src/pages/landing.js';
+import { renderDashboard } from './src/pages/dashboard.js';
+
+const app = {
+  currentPage: 'landing',
+  data: null,
+  preprocessedData: null,
+  selectedAlgorithm: null,
+  modelResults: null,
+  
+  init() {
+    this.render();
+  },
+  
+  navigateTo(page) {
+    this.currentPage = page;
+    this.render();
+  },
+  
+  render() {
+    const appContainer = document.getElementById('app');
+    
+    if (this.currentPage === 'landing') {
+      appContainer.innerHTML = renderLandingPage();
+      this.attachLandingListeners();
+    } else if (this.currentPage === 'dashboard') {
+      appContainer.innerHTML = renderDashboard();
+      this.attachDashboardListeners();
+    }
+  },
+  
+  attachLandingListeners() {
+    const startBtn = document.getElementById('start-btn');
+    if (startBtn) {
+      startBtn.addEventListener('click', () => {
+        this.navigateTo('dashboard');
+      });
+    }
+  },
+  
+  attachDashboardListeners() {
+    const backBtn = document.getElementById('back-to-home');
+    if (backBtn) {
+      backBtn.addEventListener('click', () => {
+        this.navigateTo('landing');
+      });
+    }
+    
+    import('./src/components/dashboard-handlers.js').then(module => {
+      module.initDashboardHandlers(this);
+    });
+  }
+};
+
+app.init();
+
+export default app;
