@@ -1,5 +1,9 @@
 # MachineHub
 
+> [!IMPORTANT]
+> **This is a Vite project, not a Vue CLI project.**
+> Please use the scripts defined in `package.json` (e.g., `yarn build`, `yarn dev`). Do **not** use `vue-cli-service` as it is not installed and will cause errors.
+
 A comprehensive machine learning platform for developers and data scientists, built with Vite, Tailwind CSS, and vanilla JavaScript.
 
 ## Project Setup
@@ -22,7 +26,7 @@ In the project directory, you can run:
 This command starts the development server. Open [http://localhost:5173](http://localhost:5173) (or the URL provided in your terminal) to view the application in your browser. The server supports hot-reloading, so the page will update automatically as you edit the code.
 
 ### `yarn build`
-This command builds the application for production. It bundles all the files into a `dist` directory, optimizing them for performance. This is the command you should run before deploying your website.
+This command builds the application for production. It bundles all the files into a `dist` directory, optimizing them for performance. **This is the correct command to build your project.**
 
 ### `yarn preview`
 This command starts a local server to preview the production build from the `dist` directory. It's a useful way to test the final output before deploying it to a live environment.
