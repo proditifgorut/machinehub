@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MachineHub - Your Machine Learning Platform</title>
+  <meta name="description" content="MachineHub - A comprehensive machine learning platform for developers and data scientists">
+  <meta property="og:title" content="MachineHub - Your Machine Learning Platform">
+  <meta property="og:description" content="MachineHub - A comprehensive machine learning platform for developers and data scientists">
+  <meta property="og:image:alt" content="MachineHub platform preview">
+  <meta name="twitter:title" content="MachineHub - Your Machine Learning Platform">
+  <meta name="twitter:description" content="MachineHub - A comprehensive machine learning platform for developers and data scientists">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "MachineHub",
+      "description": "A comprehensive machine learning platform"
+    }
+  </script>
+  <script type="module" crossorigin src="/assets/main-Cb3DWfEM.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/main-BkSsxe0f.css">
+</head>
+<body class="bg-gray-50">
+  <div id="app"></div>
+</body>
+</html>
