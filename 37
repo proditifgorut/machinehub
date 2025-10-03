@@ -1,0 +1,39 @@
+export const Footer = () => `
+  <footer class="bg-gray-900 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="grid md:grid-cols-4 gap-8">
+        <div>
+          <h3 class="font-bold text-lg mb-4">MachineHub</h3>
+          <p class="text-gray-400 text-sm">Empowering developers with ML tools.</p>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4 text-gray-200">Product</h4>
+          <ul class="space-y-3 text-gray-400">
+            <li><a href="#" class="hover:text-white transition-colors text-sm">Features</a></li>
+            <li><a href="#" class="hover:text-white transition-colors text-sm">Pricing</a></li>
+            <li><a href="#" class="hover:text-white transition-colors text-sm">Documentation</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4 text-gray-200">Company</h4>
+          <ul class="space-y-3 text-gray-400">
+            <li><a href="#" class="hover:text-white transition-colors text-sm">About</a></li>
+            <li><a href="#" class="hover:text-white transition-colors text-sm">Blog</a></li>
+            <li><a href="#" class="hover:text-white transition-colors text-sm">Careers</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4 text-gray-200">Legal</h4>
+          <ul class="space-y-3 text-gray-400">
+            <li><a href="#" class="hover:text-white transition-colors text-sm">Privacy</a></li>
+            <li><a href="#" class="hover:text-white transition-colors text-sm">Terms</a></li>
+            <li><a href="#" class="hover:text-white transition-colors text-sm">Security</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500">
+        <p class="text-sm">&copy; 2025 MachineHub. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+`;
